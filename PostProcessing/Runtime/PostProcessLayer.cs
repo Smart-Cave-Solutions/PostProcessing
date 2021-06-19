@@ -51,6 +51,8 @@ namespace UnityEngine.Rendering.PostProcessing
             TemporalAntialiasing
         }
 
+        public static bool KeepProjectionMatrix = true;
+
         /// <summary>
         /// This is transform that will be drive the volume blending feature. In some cases you may
         /// want to use a transform other than the camera, e.g. for a top down game you'll want the
@@ -445,14 +447,16 @@ namespace UnityEngine.Rendering.PostProcessing
 #if UNITY_2018_2_OR_NEWER
             if (!m_Camera.usePhysicalProperties)
 #endif
-                m_Camera.ResetProjectionMatrix();
+                {
+                    if (!KeepProjectionMatrix) m_Camera.ResetProjectionMatrix();
+                }
             }
             m_Camera.nonJitteredProjectionMatrix = m_Camera.projectionMatrix;
 
 #if (ENABLE_VR_MODULE && ENABLE_VR)
             if (m_Camera.stereoEnabled)
             {
-                m_Camera.ResetStereoProjectionMatrices();
+                if (!KeepProjectionMatrix) m_Camera.ResetStereoProjectionMatrices();
                 Shader.SetGlobalFloat(ShaderIDs.RenderViewportScaleFactor, XRSettings.renderViewportScale);
             }
             else
@@ -687,11 +691,13 @@ namespace UnityEngine.Rendering.PostProcessing
                     m_Camera.usePhysicalProperties = true;
                 else
 #endif
-                    m_Camera.ResetProjectionMatrix();
+                {
+                    if (!KeepProjectionMatrix) m_Camera.ResetProjectionMatrix();
+                }
 
                 if (m_CurrentContext.stereoActive)
                 {
-                    if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right)
+                    if (RuntimeUtilities.isSinglePassStereoEnabled || m_Camera.stereoActiveEye == Camera.MonoOrStereoscopicEye.Right && !KeepProjectionMatrix)
                         m_Camera.ResetStereoProjectionMatrices();
                 }
             }
