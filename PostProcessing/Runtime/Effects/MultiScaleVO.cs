@@ -511,6 +511,15 @@ namespace UnityEngine.Rendering.PostProcessing
             GenerateAOMap(cmd, context.camera, m_AmbientOnlyAO, null, false, false);
             PushDebug(context);
             cmd.SetGlobalTexture(ShaderIDs.MSVOcclusionTexture, m_AmbientOnlyAO);
+
+            // WORKAROUND: fix viewport scaling in stereo mode
+            var rect = context.camera.rect;
+            var viewport = context.stereoActive ? 
+                new Vector4(rect.xMin, rect.yMin, rect.size.x, rect.size.y) : 
+                new Vector4(0f, 0f, 1f, 1f);
+            this.m_PropertySheet.properties.SetVector("_ViewportRect", viewport);
+            //End of workaround
+
             cmd.BlitFullscreenTriangle(BuiltinRenderTextureType.None, BuiltinRenderTextureType.CameraTarget, m_PropertySheet, (int)Pass.CompositionForward, RenderBufferLoadAction.Load);
             cmd.EndSample("Ambient Occlusion");
         }

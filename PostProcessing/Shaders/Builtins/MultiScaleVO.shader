@@ -12,6 +12,8 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
         TEXTURE2D_SAMPLER2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture);
         float3 _AOColor;
 
+        float4 _ViewportRect;
+
     ENDHLSL
 
     SubShader
@@ -76,6 +78,10 @@ Shader "Hidden/PostProcessing/MultiScaleVO"
 
                 float4 Frag(VaryingsDefault i) : SV_Target
                 {
+                    // WORKAROUND: fix viewport scaling in stereo mode
+                    i.texcoordStereo *= _ViewportRect.zw;
+                    //End of workaround
+
                     half ao = 1.0 - SAMPLE_TEXTURE2D(_MSVOcclusionTexture, sampler_MSVOcclusionTexture, i.texcoordStereo).r;
 
                     // Apply fog when enabled (forward-only)
